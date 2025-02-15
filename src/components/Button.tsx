@@ -23,8 +23,8 @@ export const btnVariants = cva(
         quaternary: '',
       },
       size: {
-        sm: 'h-8 px-3 [&_svg]:size-4',
-        md: 'h-9 px-3 [&_svg]:size-5',
+        sm: 'h-8 px-3 [&_svg]:size-6',
+        md: 'h-9 px-3 py-2 [&_svg]:size-5',
         lg: 'h-10 px-4 [&_svg]:size-6',
         icon: 'size-9',
       },
@@ -87,7 +87,7 @@ export default function Button({
   const twClasses = mergeClasses(
     btnVariants({ variant, size, className }),
     disabled && 'cursor-default opacity-80 pointer-event-none',
-    size === 'sm' && '[&_svg:size-4]'
+    size === 'md'
   );
 
   const content = (
