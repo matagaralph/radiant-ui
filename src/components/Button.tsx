@@ -23,9 +23,9 @@ export const btnVariants = cva(
         quaternary: '',
       },
       size: {
-        sm: 'h-7 px-3 [&_svg]:size-4',
-        md: 'h-8 px-3 [&_svg]:size-5',
-        lg: 'h-9 px-3 [&_svg]:size-6',
+        sm: 'h-8 px-3 [&_svg]:size-4',
+        md: 'h-9 px-3 [&_svg]:size-5',
+        lg: 'h-10 px-4 [&_svg]:size-6',
         icon: 'size-9',
       },
     },
