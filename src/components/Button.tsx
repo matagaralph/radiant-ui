@@ -1,12 +1,18 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { type ButtonHTMLAttributes, cloneElement, isValidElement, type ReactElement } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  cloneElement,
+  isValidElement,
+  type ReactElement,
+  type ComponentProps,
+} from 'react';
 import { mergeClasses, titleCase } from '../helpers';
 import { LinkBase, type LinkBaseProps } from './Link';
 
 export type ButtonBaseProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const btnVariants = cva(
-  'inline-flex  rounded-md outline-none focus:outline font-medium gap-2 active:scale-98 items-center whitespace-nowrap text-sm transition focus-visible:outline-none  [&_svg]:pointer-events-none [&_svg]:shrink-0',
+  'inline-flex rounded-md outline-none focus:outline font-medium gap-2 active:scale-98 items-center whitespace-nowrap text-sm transition focus-visible:outline-none [&_svg]:pointer-events-none [&_svg]:shrink-0',
   {
     variants: {
       variant: {
@@ -30,11 +36,13 @@ export const btnVariants = cva(
   }
 );
 
+type IconComponent = React.ComponentType<{ className?: string }>;
+
 export type ButtonProps = ButtonBaseProps &
   VariantProps<typeof btnVariants> &
   LinkBaseProps & {
-    right?: ReactElement;
-    left?: ReactElement;
+    leftSlot?: ReactElement<ComponentProps<IconComponent>> | ReactElement;
+    rightSlot?: ReactElement<ComponentProps<IconComponent>> | ReactElement;
     capitalise?: boolean;
   };
 
@@ -62,8 +70,8 @@ export function ButtonBase({
 export default function Button({
   children,
   className,
-  right,
-  left,
+  leftSlot,
+  rightSlot,
   href,
   openInNewTab,
   variant,
@@ -72,8 +80,8 @@ export default function Button({
   disabled = false,
   ...rest
 }: ButtonProps) {
-  const isLeftIcon = left && isIconElement(left);
-  const isRightIcon = right && isIconElement(right);
+  const isLeftSlotIcon = leftSlot && isIconComponent(leftSlot);
+  const isRightSlotIcon = rightSlot && isIconComponent(rightSlot);
   const iconClasses = '[data-disabled:opacity-60]';
 
   const twClasses = mergeClasses(
@@ -84,7 +92,9 @@ export default function Button({
 
   const content = (
     <>
-      {isLeftIcon ? cloneElement(left, getIconProps(left, iconClasses)) : left}
+      {isLeftSlotIcon && leftSlot
+        ? cloneElement(leftSlot, getIconProps(leftSlot, iconClasses))
+        : leftSlot}
       {children && (
         <span
           className={mergeClasses(
@@ -95,9 +105,12 @@ export default function Button({
           {typeof children === 'string' && !capitalise ? titleCase(children) : children}
         </span>
       )}
-      {isRightIcon ? cloneElement(right, getIconProps(right, iconClasses)) : right}
+      {isRightSlotIcon && rightSlot
+        ? cloneElement(rightSlot, getIconProps(rightSlot, iconClasses))
+        : rightSlot}
     </>
   );
+
   if (href) {
     return (
       <LinkBase
@@ -110,27 +123,30 @@ export default function Button({
         {content}
       </LinkBase>
     );
-  } else {
-    return (
-      <ButtonBase className={twClasses} disabled={disabled} {...rest}>
-        {content}
-      </ButtonBase>
-    );
   }
+
+  return (
+    <ButtonBase className={twClasses} disabled={disabled} {...rest}>
+      {content}
+    </ButtonBase>
+  );
 }
 
-function isIconElement(element: ReactElement) {
+function isIconComponent(
+  element: ReactElement
+): element is ReactElement<ComponentProps<IconComponent>> {
   if (isValidElement(element)) {
-    // @ts-expect-error React Portal did not have `displayName` prop, but it is a valid element
-    return element.type?.displayName?.endsWith('Icon') ?? false;
+    return (
+      element.type.toString().includes('Icon') ||
+      (typeof element.type === 'function' && element.type.name.includes('Icon'))
+    );
   }
   return false;
 }
 
-function getIconProps(element: ReactElement, classNames: string) {
+function getIconProps(element: ReactElement<ComponentProps<IconComponent>>, classNames: string) {
   return {
-    ...(element.props as Record<string, any>),
-    //@ts-expect-error
+    ...element.props,
     className: mergeClasses(classNames, element.props.className),
   };
 }
