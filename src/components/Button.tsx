@@ -31,7 +31,7 @@ export const btnVariants = cva(
     },
     defaultVariants: {
       variant: 'primary',
-      size: 'sm',
+      size: 'md',
     },
   }
 );
